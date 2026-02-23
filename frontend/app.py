@@ -1,38 +1,32 @@
 import requests
 
+# Get questions
 response = requests.get("http://127.0.0.1:5000/questions")
 questions = response.json()
 
 print("\nAI Interview Simulator\n")
 
-answers = []
-score = 0
+user_answers = []
 
 for q in questions:
     print(f"\nQuestion {q['id']}: {q['question']}")
-    user_answer = input("Your Answer: ")
+    answer = input("Your Answer: ")
+    user_answers.append(answer)
 
-    # Simple scoring logic
-    if len(user_answer.split()) > 3:
-        score += 1
+# Send answers to backend for evaluation
+evaluation_response = requests.post(
+    "http://127.0.0.1:5000/evaluate",
+    json={"answers": user_answers}
+)
 
-    answers.append({
-        "question": q["question"],
-        "answer": user_answer
-    })
+result = evaluation_response.json()
 
 print("\nInterview Completed!\n")
-print("Your Answers Summary:\n")
+print(f"Final Score: {result['score']}/{result['total']}")
 
-for i, item in enumerate(answers, start=1):
-    print(f"{i}. {item['question']}")
-    print(f"   Your Answer: {item['answer']}\n")
-
-print(f"Final Score: {score}/{len(questions)}")
-
-if score == len(questions):
+if result["score"] == result["total"]:
     print("Excellent performance! 🌟")
-elif score >= 2:
+elif result["score"] >= 2:
     print("Good job! Keep improving 👍")
 else:
     print("You need to elaborate more in your answers.")
