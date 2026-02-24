@@ -1,3 +1,4 @@
+from flask import render_template
 from flask import Flask, jsonify, request
 from sentence_transformers import SentenceTransformer, util
 import torch
@@ -22,7 +23,7 @@ ideal_answers = [
 
 @app.route("/")
 def home():
-    return "AI Interview Simulator Backend Running!"
+    return render_template("index.html")
 
 @app.route("/questions", methods=["GET"])
 def get_questions():
