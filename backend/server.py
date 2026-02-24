@@ -1,45 +1,49 @@
 from flask import Flask, jsonify, request
+from sentence_transformers import SentenceTransformer, util
+import torch
 
 app = Flask(__name__)
 
-# Sample interview questions
+# Load pre-trained model
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 questions = [
     {"id": 1, "question": "Tell me about yourself."},
     {"id": 2, "question": "What are your strengths?"},
     {"id": 3, "question": "Explain a challenging project you worked on."}
 ]
 
-# Home route
+# Ideal answers for comparison
+ideal_answers = [
+    "My name is Sakshi and I have a background in computer applications with experience in AI and software development.",
+    "My strengths include confidence, problem-solving skills, and strong technical knowledge.",
+    "I worked on an AI-based project where I faced challenges in model training and successfully solved them."
+]
+
 @app.route("/")
 def home():
     return "AI Interview Simulator Backend Running!"
 
-# Get questions API
 @app.route("/questions", methods=["GET"])
 def get_questions():
     return jsonify(questions)
 
-# Evaluate answers API
 @app.route("/evaluate", methods=["POST"])
 def evaluate_answers():
     data = request.json
     answers = data.get("answers", [])
 
-    # Expected keywords for each question
-    expected_keywords = [
-        ["name", "background", "experience"],
-        ["strength", "confidence", "skill"],
-        ["challenge", "project", "problem", "solution"]
-    ]
-
     score = 0
 
-    for i, ans in enumerate(answers):
-        ans_lower = ans.lower()
+    for i, user_answer in enumerate(answers):
+        if i < len(ideal_answers):
+            embeddings = model.encode([user_answer, ideal_answers[i]], convert_to_tensor=True)
+            similarity = util.pytorch_cos_sim(embeddings[0], embeddings[1])
+            
+            similarity_score = similarity.item()
 
-        # Check if any keyword matches
-        if i < len(expected_keywords):
-            if any(keyword in ans_lower for keyword in expected_keywords[i]):
+            # If similarity > 0.5 → consider good answer
+            if similarity_score > 0.5:
                 score += 1
 
     return jsonify({
