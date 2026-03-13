@@ -14,14 +14,14 @@ questions = [
     {"id": 3, "question": "Explain a challenging project you worked on."}
 ]
 
-# Ideal answers used for semantic comparison
+# Ideal answers used for comparison
 ideal_answers = [
     "My name is Sakshi and I have a background in computer applications with experience in AI and software development.",
     "My strengths include confidence, problem-solving skills, and strong technical knowledge.",
     "I worked on an AI-based project where I faced challenges in model training and successfully solved them."
 ]
 
-# Home page (HTML interface)
+# Home page
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -59,10 +59,16 @@ def evaluate_answers():
 
             similarity_score = similarity.item()
 
-            # Save similarity percentage
+            # Save similarity + feedback
             details.append({
                 "question": questions[i]["question"],
-                "similarity": round(similarity_score * 100, 2)
+                "similarity": round(similarity_score * 100, 2),
+                "feedback": (
+                    "Excellent answer!" if similarity_score > 0.8 else
+                    "Good answer but could include more details." if similarity_score > 0.6 else
+                    "Partially relevant answer." if similarity_score > 0.4 else
+                    "Answer not relevant to the question."
+                )
             })
 
             # scoring threshold

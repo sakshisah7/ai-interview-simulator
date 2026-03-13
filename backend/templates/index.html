@@ -2,58 +2,141 @@
 <html>
 <head>
     <title>AI Interview Simulator</title>
-</head>
-<body>
 
-    <h1>AI Interview Simulator</h1>
+<style>
 
-    <form id="interviewForm">
-        <div id="questions"></div>
-        <br>
-        <button type="submit">Submit Answers</button>
-    </form>
-
-    <h2 id="result"></h2>
-
-<script>
-async function loadQuestions() {
-    const response = await fetch('/questions');
-    const questions = await response.json();
-
-    const container = document.getElementById("questions");
-
-    questions.forEach(q => {
-        const div = document.createElement("div");
-        div.innerHTML = `
-            <p><strong>${q.question}</strong></p>
-            <input type="text" name="answer" style="width:400px"><br><br>
-        `;
-        container.appendChild(div);
-    });
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:0;
 }
 
-document.getElementById("interviewForm").addEventListener("submit", async function(e) {
-    e.preventDefault();
+.container{
+    width:700px;
+    margin:50px auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
 
-    const inputs = document.querySelectorAll("input[name='answer']");
-    const answers = [];
+h1{
+    text-align:center;
+    color:#333;
+}
 
-    inputs.forEach(input => {
-        answers.push(input.value);
-    });
+.question{
+    margin-top:25px;
+}
 
-    const response = await fetch('/evaluate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers: answers })
-    });
+input{
+    width:100%;
+    padding:10px;
+    margin-top:8px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:16px;
+}
 
-    const result = await response.json();
+button{
+    margin-top:25px;
+    padding:12px 20px;
+    background:#007bff;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-size:16px;
+    cursor:pointer;
+}
 
-    let output = `Final Score: ${result.score}/${result.total}\n\n`;
+button:hover{
+    background:#0056b3;
+}
 
-result.details.forEach((item, index) => {
-    output += `Question ${index + 1} Similarity: ${item.similarity}%\n`;
+.result{
+    margin-top:30px;
+    padding:15px;
+    background:#f1f1f1;
+    border-radius:6px;
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+<h1>AI Interview Simulator 🤖</h1>
+
+<form id="interviewForm">
+<div id="questions"></div>
+
+<button type="submit">Submit Answers</button>
+</form>
+
+<div class="result">
+<h2 id="result"></h2>
+</div>
+
+</div>
+
+<script>
+
+async function loadQuestions(){
+
+const response = await fetch('/questions');
+const questions = await response.json();
+
+const container = document.getElementById("questions");
+
+questions.forEach(q => {
+
+const div = document.createElement("div");
+
+div.classList.add("question");
+
+div.innerHTML = `
+<p><strong>${q.question}</strong></p>
+<input type="text" name="answer">
+`;
+
+container.appendChild(div);
+
+});
+
+}
+
+document.getElementById("interviewForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const inputs = document.querySelectorAll("input[name='answer']");
+const answers = [];
+
+inputs.forEach(input => {
+answers.push(input.value);
+});
+
+const response = await fetch('/evaluate',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({answers:answers})
+});
+
+const result = await response.json();
+
+let output = `Final Score: ${result.score}/${result.total}\n\n`;
+
+result.details.forEach((item,index)=>{
+
+output += `Question ${index+1}\n`;
+output += `Similarity: ${item.similarity}%\n`;
+output += `Feedback: ${item.feedback}\n\n`;
+
 });
 
 document.getElementById("result").innerText = output;
@@ -61,6 +144,7 @@ document.getElementById("result").innerText = output;
 });
 
 loadQuestions();
+
 </script>
 
 </body>
