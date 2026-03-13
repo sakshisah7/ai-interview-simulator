@@ -50,8 +50,14 @@ document.getElementById("interviewForm").addEventListener("submit", async functi
 
     const result = await response.json();
 
-    document.getElementById("result").innerText =
-        `Final Score: ${result.score}/${result.total}`;
+    let output = `Final Score: ${result.score}/${result.total}\n\n`;
+
+result.details.forEach((item, index) => {
+    output += `Question ${index + 1} Similarity: ${item.similarity}%\n`;
+});
+
+document.getElementById("result").innerText = output;
+
 });
 
 loadQuestions();
